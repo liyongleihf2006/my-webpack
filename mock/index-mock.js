@@ -1,0 +1,13 @@
+Mock.mock("menu",[{
+    "id":1,
+    "name":"first",
+    "url":"first"
+},{
+    "id":2,
+    "name":"second",
+    "url":"second"
+},{
+    "id":3,
+    "name":"third",
+    "url":"third"
+}]);

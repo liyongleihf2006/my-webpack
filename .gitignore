@@ -1,0 +1,10 @@
+~*
+.*
+!.gitignore
+!.babelrc
+bower_components/
+build/
+dist/
+dll/
+node_modules/
+package-lock.json
