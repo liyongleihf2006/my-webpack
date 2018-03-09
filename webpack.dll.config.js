@@ -12,6 +12,7 @@ module.exports = {
     entry: {
         dll: ['mobx','lodash','axios'],
     },
+    mode:"development",
     plugins: [
         new CleanWebpackPlugin([path.join(__dirname,"dll")]),
         new webpack.DllPlugin({

@@ -3,7 +3,6 @@ var webpack = require('webpack');
 var UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 var CompressionPlugin = require("compression-webpack-plugin");
 var CleanWebpackPlugin = require('clean-webpack-plugin');
-
 var merge = require('webpack-merge');
 var common = require('./webpack.common.config.js');
 var outputFolder = "build";
@@ -21,6 +20,7 @@ module.exports = merge(common, {
         chunkFilename:'[name].[chunkhash:4].js'
         /* publicPath:"http://www.baidu.com/" */
     },
+    mode:"production",
     module:{
         rules:[
             {
@@ -58,14 +58,8 @@ module.exports = merge(common, {
     },
     plugins: [
         new CleanWebpackPlugin([path.join(__dirname,outputFolder)]),
-        new webpack.EnvironmentPlugin({
-            NODE_ENV: 'production',
-        }),
         new webpack.BannerPlugin('没有版权,请任意使用'),
         new webpack.optimize.OccurrenceOrderPlugin(),
-        /* new UglifyJSPlugin({
-            sourceMap: true
-        }), */
         /* 
             压缩操作的时候所有的html css js json都进行gzip 
             所有的其他文件都不进行gzip压缩
