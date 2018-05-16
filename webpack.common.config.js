@@ -1,7 +1,7 @@
 var path = require('path');
 var webpack = require('webpack');
 var HtmlWebpackPlugin = require("html-webpack-plugin");
-var ExtractTextPlugin = require("extract-text-webpack-plugin");
+var MiniCssExtractPlugin = require("mini-css-extract-plugin");
 var CleanWebpackPlugin = require('clean-webpack-plugin');
 var ManifestPlugin = require('webpack-manifest-plugin');
 module.exports = {
@@ -23,17 +23,15 @@ module.exports = {
             include: path.join(__dirname, 'app')
         }, {
             test: /\.css$/,
-            use: ExtractTextPlugin.extract({
-                fallback: "style-loader",
-                use: [{
-                    loader: "css-loader",
-                    options: {
-                        sourceMap: true
-                    }
-                }, {
-                    loader: "postcss-loader"
-                }]
-            }),
+            use: [MiniCssExtractPlugin.loader,
+            {
+                loader: "css-loader",
+                options: {
+                    sourceMap: true
+                }
+            }, {
+                loader: "postcss-loader"
+            }],
             include: path.join(__dirname, 'app')
         }, {
             test: /\.(png|jpg|gif|tiff|bmp|psd)$/,
@@ -81,12 +79,15 @@ module.exports = {
                 return chunk1.names[0] !== 'dll';
             }
         }),
-        new ExtractTextPlugin({
-            filename: "[name].[contenthash:4].css"
-        }),
         new webpack.DllReferencePlugin({
             context: __dirname,
             manifest: path.join('dll', 'manifest.json'),
+        }),
+        new MiniCssExtractPlugin({
+            // Options similar to the same options in webpackOptions.output
+            // both options are optional
+            filename: '[name].[contenthash:4].css',
+            chunkFilename: '[id].[contenthash:4].css'
         })
     ]
 }
