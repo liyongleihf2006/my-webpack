@@ -19,8 +19,9 @@ module.exports = {
             path: path.join(__dirname, 'dll','manifest.json'),
             // This must match the output.library option above
             name: "window."+library,
-            //千千万万不要设置context
-            /* context:... this is wrong */
+            //这里的context要设置的跟webpack.common.config.js中的相同
+            //若webpack.common.config.js中没有设置context，那么这里不要设置
+            /* context:...  */
         }),
     ],
 }
