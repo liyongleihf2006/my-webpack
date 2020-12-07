@@ -6,40 +6,31 @@
   "keywords": [
     "webpack",
     "jquery",
-    "mobx",
     "lodash",
-    "axios",
     "javascript",
     "css",
     "html"
   ],
   "scripts": {
-    "bower": "bower install",
-    "dll": "webpack --config ./webpack.dll.config.js",
-    "start": "npm run bower&&npm run dll && webpack --config ./webpack.dev.config.js",
-    "start:nomock": "npm run bower&&npm run dll && webpack --config ./webpack.dev-nomock.config.js",
-    "server": "npm run bower&&npm run dll && webpack-dev-server --config ./webpack.dev.config.js  --inline --open",
-    "server:nomock": "npm run bower&&npm run dll && webpack-dev-server --config ./webpack.dev-nomock.config.js  --inline --open",
-    "build": "npm run bower&&npm run dll && webpack --config ./webpack.prod.config.js",
-    "debug:start": "npm run bower&&npm run dll && node --inspect --inspect-brk node_modules/webpack/bin/webpack --config ./webpack.dev.config.js",
-    "debug:build": "npm run bower&&npm run dll && node --inspect --inspect-brk node_modules/webpack/bin/webpack --config ./webpack.prod.config.js"
+    "dist": "webpack --config ./webpack.dev.config.js",
+    "serve": "webpack-dev-server --config ./webpack.dev.config.js  --inline --open",
+    "build": "webpack --config ./webpack.prod.config.js",
+    "debug:start": "node --inspect --inspect-brk node_modules/webpack/bin/webpack --config ./webpack.dev.config.js",
+    "debug:build": "node --inspect --inspect-brk node_modules/webpack/bin/webpack --config ./webpack.prod.config.js"
   },
   "author": "liyongleihf2006",
   "license": "ISC",
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.4",
-    "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-es2016": "^6.24.1",
-    "babel-preset-es2017": "^6.24.1",
-    "bower": "^1.8.2",
+    "@babel/core": "^7.12.9",
+    "@babel/preset-env": "^7.12.7",
+    "babel-loader": "^8.2.2",
     "clean-webpack-plugin": "^0.1.18",
     "compression-webpack-plugin": "^1.1.10",
     "css-loader": "^0.28.10",
     "ensure-chunk-loader": "^3.0.0",
     "ensure-script-loader": "^1.0.0",
+    "eslint": "^7.15.0",
+    "eslint-webpack-plugin": "^2.4.1",
     "extract-loader-path-correction": "^1.0.0",
     "file-loader": "^1.1.11",
     "html-loader": "^0.5.5",
@@ -57,8 +48,9 @@
     "webpack-merge": "^4.1.2"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.12.1",
+    "@babel/runtime": "^7.12.5",
     "axios": "^0.18.0",
-    "lodash": "^4.17.5",
-    "mobx": "^3.6.1"
+    "lodash": "^4.17.5"
   }
 }

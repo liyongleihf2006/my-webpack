@@ -2,6 +2,7 @@
 .*
 !.gitignore
 !.babelrc
+!.eslintrc.js
 bower_components/
 build/
 dist/

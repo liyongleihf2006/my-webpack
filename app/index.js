@@ -1,10 +1,20 @@
 import "./index.css";
-import * as mobx from "mobx";
 import * as axios from "axios";
 import header from './header';
 var router = require("ensure-chunk-loader?pattern=./app/modules/*/&page-suffix=html&script-suffix=js!");
+console.log(router)
+var promise = new Promise(function(resolve,reject){
+    resolve('aaa')
+})
+async function abc(){
+    const val = promise
+    console.log(val)
+    console.log('aaaaaaaaaaaaaaaaaaaaaaaa')
+}
+abc()
+console.log(Map)
 $("#leftMenu").leftMenu({
-    datas: [],
+        datas: [],
     showExpand: true,
     expandFormatter: function (currentData, isLeaf, isActive, isExpand, level, idx, currentDatas, upperData, datas) {
         return $("<span/>", {
@@ -63,7 +73,7 @@ $("#leftMenu").leftMenu({
         } */
         {
             //子页面加载后一直缓存的写法
-            var $page = $(`[data-page=${currentData.name}]`);
+            /* var $page = $(`[data-page=${currentData.name}]`);
             if (!$page.length) {
                 $page = $("<div/>", {
                     "class": "page",
@@ -74,7 +84,7 @@ $("#leftMenu").leftMenu({
                 script();
             }
             $(".page").addClass("hidden");
-            $page.removeClass("hidden");
+            $page.removeClass("hidden"); */
         }
 
     },
@@ -88,8 +98,19 @@ $("#leftMenu").leftMenu({
 });
 async function getMenuData() {
     try {
-        let { data } = await axios.get("menu");
-        $("#leftMenu").leftMenu("setDatas", data);
+        $("#leftMenu").leftMenu("setDatas", [{
+            "id":1,
+            "name":"first",
+            "url":"first"
+        },{
+            "id":2,
+            "name":"second",
+            "url":"second"
+        },{
+            "id":3,
+            "name":"third",
+            "url":"third"
+        }]);
     } catch (e) {
         console.error(e);
     }

@@ -1,0 +1,204 @@
+.table-wrap {
+    border: 2px solid #ddd;
+    border-bottom: 0px;
+    margin-bottom: 20px;
+    max-height: 600px;
+    width: calc(100% - 6px);
+}
+
+.table {
+    text-align: center;
+    table-layout: fixed;
+    margin-bottom: 0;
+    border-color: transparent;
+}
+
+/*  文字不折行显示，超出边界显示...*/
+
+.table.table-hover td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.thead-wrap {
+    background-color: #088e8d;
+}
+
+.table-thead {
+    color: white;
+}
+
+/* .table-wrap {
+    overflow-y: auto;
+    overflow-x: hidden;
+} */
+
+.tbody-wrap {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.tbody-wrap thead {
+    visibility: hidden;
+}
+
+.table th
+/* ,
+.table td */
+
+    {
+    word-wrap: break-word;
+    text-align: inherit;
+}
+
+.table>tbody>tr>td,
+.table>tbody>tr>th,
+.table>tfoot>tr>td,
+.table>tfoot>tr>th,
+.table>thead>tr>td,
+.table>thead>tr>th {
+    vertical-align: middle;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #ddd;
+}
+
+.table-no {
+    width: 4em;
+}
+
+.table-checkbox {
+    width: 5em;
+}
+
+.table-head-radio {
+    width: 4em;
+}
+
+.table .selected {
+    background-color: #e5e6e8 !important;
+}
+
+/*table中的复选框*/
+
+.table label {
+    margin: 0;
+}
+
+.table-right-checkbox {
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    box-sizing: content-box;
+    cursor: pointer;
+    vertical-align: middle;
+    margin-bottom: 0;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    position: relative;
+}
+
+.table-right-checkbox.disabled {
+    cursor: not-allowed;
+}
+
+.table-right-checkbox>input {
+    position: absolute;
+    margin: 0;
+    opacity: 0;
+    vertical-align: bottom;
+}
+
+.table-right-checkbox>input+.table-checkbox-container {
+    display: inline-block;
+    width: inherit;
+    height: inherit;
+    position: absolute;
+    color: transparent;
+    border: 1px solid #cacbcd;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.table-right-checkbox>input:disabled+.table-checkbox-container {
+    border-color: rgba(220, 220, 220, .5);
+}
+
+.table-right-checkbox>input:checked+.table-checkbox-container {
+    color: #0d84d4;
+    border: 1px solid currentColor;
+}
+
+.table-right-checkbox>input:checked:disabled+.table-checkbox-container {
+    color: rgba(220, 220, 220, .5);
+}
+
+.table-right-checkbox>input+.table-checkbox-container::before {
+    content: "\2713";
+    line-height: 1;
+    vertical-align: top;
+    display: inherit;
+    font-size: 1.8em;
+    margin-top: -.4em;
+    font-weight: lighter;
+    position: relative;
+    visibility: hidden;
+}
+
+.table-right-checkbox>input:checked+.table-checkbox-container::before {
+    visibility: visible;
+}
+
+.table-right-checkbox::after {
+    content: "c";
+    opacity: 0;
+    display: inline-block;
+}
+
+.table-draggable {
+    cursor: col-resize;
+    user-select: none;
+}
+
+/*!table中的复选框*/
+
+/*table中的单选框*/
+
+/* .table-radio{
+    color: #0d84d4;
+    width: calc(1em - 4px);
+    height: calc(1em - 4px);
+    padding: 2px;
+    border: 1px solid;
+    display: inline-block;
+    border-radius: 50%;
+    box-sizing: content-box;
+    vertical-align: middle;
+}
+.table-radio>input{
+    position: absolute;
+    margin: 0;
+    opacity: 0;
+    vertical-align: bottom;
+}
+.table-radio>input+.table-radio-container{
+    display: inline-block;
+    width: inherit;
+    height: inherit;
+    border-radius: inherit;
+    transition: background-color .3s;
+    box-sizing: content-box;
+    vertical-align: top;
+}
+.table-radio>input:checked+.table-radio-container{
+    background-color: currentColor;
+}
+.table-radio::after{
+    content:"r";
+    opacity: 0;
+} */
+
+/*!table中的单选框*/

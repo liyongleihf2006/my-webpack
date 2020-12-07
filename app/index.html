@@ -1,40 +1,42 @@
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>webpack+jquery+mobx</title>
-    <link rel="stylesheet" href="../bower_components/font-awesome/css/font-awesome.css">
-    <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css">
-    <link rel="stylesheet" href="../bower_components/jquery-leftMenu/jquery-leftMenu/leftMenu.css">
-    <link rel="stylesheet" href="../bower_components/jquery-table/jquery-table/jquery-table.css">
-</head>
-<body>
-    <svg style="display: none;">
-        <symbol id="bullet.svg" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="50" fill="#bbb"/>
-        </symbol>
-    </svg>
-    <div class="header">
-        <div class="message">
-            <span id="message"></span>
-            <i class="fa fa-bell-o" aria-hidden="true"></i>
-        </div>
-    </div>
-    <div class="layout">
-        <div class="layout-left">
-            <div id="leftMenu"></div>
-        </div>
-        <div class="layout-right">
-            <div id="content">
 
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>webpack+jquery+mobx</title>
+        <link rel="stylesheet" href="../vender/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="../vender/jquery-leftMenu/leftMenu.css">
+        <link rel="stylesheet" href="../vender/jquery-table/jquery-table.css">
+    </head>
+
+    <body>
+        <svg style="display: none;">
+            <symbol id="bullet.svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="50" fill="#bbb" />
+            </symbol>
+        </svg>
+        <div class="header">
+            <div class="message">
+                <span id="message"></span>
+                <i class="fa fa-bell-o" aria-hidden="true"></i>
             </div>
         </div>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.26.0/polyfill.min.js"></script>
-    <script src="../bower_components/jquery/dist/jquery.js"></script>
-    <script src="../bower_components/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="../bower_components/jquery-leftMenu/jquery-leftMenu/leftMenu.js"></script>
-    <script src="../bower_components/jquery-table/jquery-table/jquery-table.js"></script>
-</body>
+        <div class="layout">
+            <div class="layout-left">
+                <div id="leftMenu"></div>
+            </div>
+            <div class="layout-right">
+                <div id="content">
+
+                </div>
+            </div>
+        </div>
+        <script src="../vender/polyfill.min.js"></script>
+        <script src="../vender/jquery.js"></script>
+        <script src="../vender/bootstrap/js/bootstrap.min.js"></script>
+        <script src="../vender/jquery-leftMenu/leftMenu.js"></script>
+        <script src="../vender/jquery-table/jquery-table.js"></script>
+    </body>
+
 </html>
