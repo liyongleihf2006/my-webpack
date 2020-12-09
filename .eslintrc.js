@@ -2,19 +2,23 @@ module.exports = {
   root: true,
   parserOptions: {
     parser: 'babel-eslint',
-    sourceType: 'module'
+    sourceType: 'module',
+    ecmaVersion: 2017
   },
   env: {
     browser: true,
     node: true,
     es6: true
   },
-  'globals': {},
+  'globals': {
+    '$': 'readonly',
+    'jQuery': 'readonly'
+  },
   extends: ['eslint:recommended'],
   // add your custom rules here
   // it is base on https://github.com/vuejs/eslint-config-vue
   rules: {
-    'no-async-promise-executor': true,
+    'no-async-promise-executor': 1,
     'accessor-pairs': 2,
     'arrow-spacing': [2, {
       'before': true,

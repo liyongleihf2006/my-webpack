@@ -12,9 +12,9 @@
     "html"
   ],
   "scripts": {
-    "dist": "webpack --config ./webpack.dev.config.js",
-    "serve": "webpack-dev-server --config ./webpack.dev.config.js  --inline --open",
-    "build": "webpack --config ./webpack.prod.config.js",
+    "dist": "webpack --config ./webpack.dev.config.js --env development",
+    "serve": "webpack-dev-server --config ./webpack.dev.config.js  --inline --open --env development",
+    "build": "webpack --config ./webpack.prod.config.js --env production",
     "debug:start": "node --inspect --inspect-brk node_modules/webpack/bin/webpack --config ./webpack.dev.config.js",
     "debug:build": "node --inspect --inspect-brk node_modules/webpack/bin/webpack --config ./webpack.prod.config.js"
   },
@@ -27,6 +27,8 @@
     "clean-webpack-plugin": "^0.1.18",
     "compression-webpack-plugin": "^1.1.10",
     "css-loader": "^0.28.10",
+    "dotenv": "^8.2.0",
+    "dotenv-webpack": "^6.0.0",
     "ensure-chunk-loader": "^3.0.0",
     "ensure-script-loader": "^1.0.0",
     "eslint": "^7.15.0",

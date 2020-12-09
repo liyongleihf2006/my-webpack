@@ -57,383 +57,389 @@
  *    getSelected:deferred
  *             获取当前被选中的节点的数据
  */
-(function ($) {
-    if ($.fn.leftMenu) {
-        return;
-    }
-    var setMethods = {
-        setDatas: setDatas,
-        refresh:refresh
-    };
-    var getMethods = {
-        getSelected: getSelected
-    };
-    //返回延迟对象的方法
-    var deferredMethods = {
-        select:select,
-        selectByIdx:selectByIdx,
-        selectDeepFirst:selectDeepFirst,
-        selectById:selectById
-    }
-    $.fn.leftMenu = function () {
-        var args = arguments, params, method;
-        if (!args.length || typeof args[0] == 'object') {
-            return this.each(function (idx) {
-                var $self = $(this);
-                $self.data('leftMenu', $.extend(true, {}, $.fn.leftMenu.default, args[0]));
-                params = $self.data('leftMenu');
-                _init.call($self, params);
-                _render.call($self);
-            });
+(function($) {
+  if ($.fn.leftMenu) {
+    return
+  }
+  var setMethods = {
+    setDatas: setDatas,
+    refresh: refresh
+  }
+  var getMethods = {
+    getSelected: getSelected
+  }
+  // 返回延迟对象的方法
+  var deferredMethods = {
+    select: select,
+    selectByIdx: selectByIdx,
+    selectDeepFirst: selectDeepFirst,
+    selectById: selectById
+  }
+  $.fn.leftMenu_default = {
+    id: 'id',
+    cascadeKey: 'children',
+    ulCls: 'leftMenu-ul',
+    liCls: 'leftMenu-li',
+    itemCls: 'leftMenu-item',
+    expandCaretCls: 'expandCaret',
+    expandCls: 'expand',
+    activeCls: 'active',
+    datas: [],
+    showExpand: true,
+    expandFormatter: function(currentData, isLeaf, isActive, isExpand, level, idx, currentDatas, upperData, datas) {
+      if (isExpand) {
+        return '-'
+      }
+      return '+'
+    },
+    formatter: function(currentData, isLeaf, isActive, isExpand, level, idx, currentDatas, upperData, datas) {
+      return $('<span/>', {
+        'text': currentData.text
+      })
+    },
+    onSelected: function(currentData, isLeaf, isActive, isExpand, level, idx, currentDatas, upperData, datas) {},
+    rowEvents: {}
+  }
+  $.fn.leftMenu = function() {
+    var args = arguments; var params; var method
+    if (!args.length || typeof args[0] === 'object') {
+      return this.each(function(idx) {
+        var $self = $(this)
+        $self.data('leftMenu', $.extend(true, {}, $.fn.leftMenu_default, args[0]))
+        params = $self.data('leftMenu')
+        _init.call($self, params)
+        _render.call($self)
+      })
+    } else {
+      if (!$(this).data('leftMenu')) {
+        throw new Error('You has not init leftMenu!')
+      }
+      params = Array.prototype.slice.call(args, 1)
+      // eslint-disable-next-line no-prototype-builtins
+      if (setMethods.hasOwnProperty(args[0])) {
+        method = setMethods[args[0]]
+        return this.each(function(idx) {
+          var $self = $(this)
+          method.apply($self, params)
+          _render.call($self)
+        })
+      // eslint-disable-next-line no-prototype-builtins
+      } else if (getMethods.hasOwnProperty(args[0])) {
+        method = getMethods[args[0]]
+        var returnValue = method.apply(this, params)
+        if (returnValue !== undefined) {
+          return returnValue
         } else {
-            if (!$(this).data('leftMenu')) {
-                throw new Error('You has not init leftMenu!');
+          var $self = $(this)
+          _render.call($self)
+          return this.data('leftMenu').deferred
+        }
+      // eslint-disable-next-line no-prototype-builtins
+      } else if (deferredMethods.hasOwnProperty(args[0])) {
+        method = deferredMethods[args[0]]
+        var _this = this
+        // 用于任何选中时,触发的onSelected解决了后的承诺
+        _this.data('leftMenu').deferreds = []
+        this.each(function(idx) {
+          var $self = $(this)
+          method.apply($self, params)
+          var deferred = new $.Deferred()
+          _this.data('leftMenu').deferreds.push({
+            ele: this,
+            deferred: deferred
+          })
+          _render.call($self)
+        })
+        return $.when.apply(null, _this.data('leftMenu').deferreds.map(function(item) {
+          return item.deferred
+        }))
+      } else {
+        throw new Error('There is no such method')
+      }
+    }
+  }
+  function _init(params) {
+    return this
+  }
+  function setDatas(datas, reset) {
+    var params = this.data('leftMenu')
+    var id = params.id
+    var cascadeKey = params.cascadeKey
+    var prevDatas = params.datas
+    if (!reset) {
+      _recursiveProcessing(datas, function(currentData) {
+        _recursiveProcessing(prevDatas, function(currentPrevData) {
+          if (currentData[id] === currentPrevData[id]) {
+            Object.keys(currentPrevData).forEach(function(key) {
+              if (key.charAt(0) === '_') {
+                currentData[key] = currentPrevData[key] || currentData[key]
+              }
+            })
+          }
+        }, cascadeKey)
+      }, cascadeKey)
+    }
+    params.datas = datas
+  }
+  function _autoExpand(datas, cascadeKey) {
+    datas.forEach(function(data) {
+      if (autoExpand(data)) {
+        data._expand = true
+      }
+    })
+    function autoExpand(data) {
+      var children = data[cascadeKey]
+      if (!children) {
+        return false
+      }
+      if (children.some(function(item) {
+        return item._active
+      })) {
+        return true
+      } else {
+        return children.some(function(data) {
+          if (autoExpand(data)) {
+            return data._expand === true
+          }
+        })
+      }
+    }
+  }
+  function select(currentData) {
+    var params = this.data('leftMenu')
+    var datas = params.datas
+    var cascadeKey = params.cascadeKey
+    var id = params.id
+    changeActive(datas)
+    _autoExpand(datas, cascadeKey)
+    function changeActive(datas) {
+      datas.forEach(function(data) {
+        // eslint-disable-next-line eqeqeq
+        data._active = currentData[id] == data[id]
+        if (data[cascadeKey]) {
+          changeActive(data[cascadeKey])
+        }
+      })
+    }
+  }
+  function selectByIdx() {
+    var idxs = Array.prototype.slice.call(arguments)
+    var params = this.data('leftMenu')
+    var datas = params.datas
+    var cascadeKey = params.cascadeKey
+    var level = idxs.length - 1
+    var currentLevel = -1
+    var currentData
+    falseActive(datas, cascadeKey)
+    while (++currentLevel <= level) {
+      if (!currentLevel) {
+        currentData = datas[idxs[currentLevel]]
+      } else {
+        currentData = currentData[cascadeKey][idxs[currentLevel]]
+      }
+    }
+    currentData._active = true
+    _autoExpand(datas, cascadeKey)
+  }
+  function falseActive(datas, cascadeKey) {
+    datas.forEach(function(data, i) {
+      data._active = false
+      if (data[cascadeKey]) {
+        falseActive(data[cascadeKey], cascadeKey)
+      }
+    })
+  }
+  function selectDeepFirst() {
+    var params = this.data('leftMenu')
+    var datas = params.datas
+    var cascadeKey = params.cascadeKey
+    var currentData = datas[0]
+    falseActive(datas, cascadeKey)
+    while (currentData && currentData[cascadeKey] && currentData[cascadeKey].length) {
+      currentData = currentData[cascadeKey][0]
+    }
+    currentData._active = true
+    _autoExpand(datas, cascadeKey)
+  }
+  function selectById(idx) {
+    var params = this.data('leftMenu')
+    var datas = params.datas
+    var cascadeKey = params.cascadeKey
+    var id = params.id
+    changeActive(datas)
+    _autoExpand(datas, cascadeKey)
+    function changeActive(datas) {
+      datas.forEach(function(data) {
+        // eslint-disable-next-line eqeqeq
+        data._active = idx == data[id]
+        if (data[cascadeKey]) {
+          changeActive(data[cascadeKey])
+        }
+      })
+    }
+  }
+  function refresh() {}
+  function getSelected() {
+    var params = this.data('leftMenu')
+    var datas = params.datas
+    var cascadeKey = params.cascadeKey
+    var currentData = null
+    _getSelected(datas)
+    return currentData
+    function _getSelected(datas) {
+      (datas || []).forEach(function(data) {
+        if (data._active) {
+          currentData = data
+        } else {
+          _getSelected(data[cascadeKey])
+        }
+      })
+    }
+  }
+  function _render(doExpand) {
+    var $self = this
+    var params = $self.data('leftMenu')
+    var datas = params.datas
+    var showExpand = params.showExpand
+    $self.addClass(function() {
+      return 'leftMenu' + (showExpand ? ' showExpand' : '')
+    }).html(
+      _recursiveGenerate.call($self, datas, -1, null, doExpand)
+    )
+  }
+  function _recursiveGenerate(currentDatas, level, upperData, doExpand) {
+    var $self = this
+    var ele = this.get(0)
+    var params = $self.data('leftMenu')
+    var datas = params.datas
+    var cascadeKey = params.cascadeKey
+    var ulCls = params.ulCls
+    var liCls = params.liCls
+    var itemCls = params.itemCls
+    var expandCaretCls = params.expandCaretCls
+    var expandCls = params.expandCls
+    var activeCls = params.activeCls
+    var formatter = params.formatter
+    var onSelected = params.onSelected
+    var rowEvents = params.rowEvents
+    var showExpand = params.showExpand
+    var expandFormatter = params.expandFormatter
+    var deferreds = params.deferreds || []
+    var deferred = deferreds.reduce(function(prev, item) {
+      if (item.ele === ele) {
+        return item.deferred
+      }
+      return prev
+    }, null)
+    return $('<ul/>', {
+      'class': ulCls
+    }).html(
+      currentDatas.map(function(currentData, idx) {
+        if (!idx) {
+          level++
+        }
+        var isLeaf = !(currentData[cascadeKey] || []).length
+        var isExpand = (function() {
+          if (!showExpand) {
+            return _isActiveAncestor.call($self, currentData)
+          } else {
+            return !!currentData._expand
+          }
+        }())
+        if (currentData._active && !doExpand) {
+          onSelected.call($self, currentData, isLeaf, !!currentData._active, isExpand, level, idx, currentDatas, upperData, datas, deferred)
+        }
+        return $('<li/>', {
+          'class': function() {
+            var cls = liCls
+            if (currentData._active) {
+              cls += ' ' + activeCls
             }
-            params = Array.prototype.slice.call(args, 1);
-            if (setMethods.hasOwnProperty(args[0])) {
-                method = setMethods[args[0]];
-                return this.each(function (idx) {
-                    var $self = $(this);
-                    method.apply($self, params);
-                    _render.call($self);
-                });
-            } else if (getMethods.hasOwnProperty(args[0])) {
-                method = getMethods[args[0]];
-                var returnValue=method.apply(this, params);
-                if(returnValue!==undefined){
-                    return returnValue;
-                }else{
-                    _render.call($self);
-                    return this.data("leftMenu").deferred;
-                }
-            } else if(deferredMethods.hasOwnProperty(args[0])){
-                method = deferredMethods[args[0]];
-                var _this = this;
-                //用于任何选中时,触发的onSelected解决了后的承诺
-                _this.data("leftMenu").deferreds=[];
-                this.each(function (idx) {
-                    var $self = $(this);
-                    method.apply($self, params);
-                    var deferred=new $.Deferred();
-                    _this.data("leftMenu").deferreds.push({
-                        ele:this,
-                        deferred:deferred
-                    });
-                    _render.call($self);
-                });
-                return $.when.apply(null,_this.data("leftMenu").deferreds.map(function(item){
-                    return item.deferred;
-                }));
+            if (!showExpand) {
+              if (_isActiveAncestor.call($self, currentData)) {
+                cls += ' ' + expandCls
+              }
             } else {
-                throw new Error('There is no such method');
+              if (currentData._expand) {
+                cls += ' ' + expandCls
+              }
             }
-        }
-    };
-    $.fn.leftMenu.default = {
-        id:"id",
-        cascadeKey:"children",
-        ulCls:"leftMenu-ul",
-        liCls:"leftMenu-li",
-        itemCls:"leftMenu-item",
-        expandCaretCls:"expandCaret",
-        expandCls:"expand",
-        activeCls:"active",
-        datas: [],
-        showExpand:true,
-        expandFormatter:function(currentData,isLeaf,isActive,isExpand,level,idx,currentDatas,upperData,datas){
-            if(isExpand){
-                return "-";
-            }
-            return "+";
-        },
-        formatter:function(currentData,isLeaf,isActive,isExpand,level,idx,currentDatas,upperData,datas){
-            return $("<span/>",{
-                "text":currentData.text
-            })
-        },
-        onSelected:function(currentData,isLeaf,isActive,isExpand,level,idx,currentDatas,upperData,datas){},
-        rowEvents: {}
-    };
-    function _init(params) {
-        return this;
-    }
-    function setDatas(datas,reset) {
-        var params = this.data('leftMenu'),
-            id=params.id,
-            cascadeKey=params.cascadeKey,
-            prevDatas=params.datas;
-        if(!reset){
-            _recursiveProcessing(datas,function(currentData){
-                _recursiveProcessing(prevDatas,function(currentPrevData){
-                    if(currentData[id]===currentPrevData[id]){
-                        Object.keys(currentPrevData).forEach(function(key){
-                            if(key.charAt(0)==="_"){
-                                currentData[key]=currentPrevData[key]||currentData[key];
-                            }
-                        });
-                    }
-                },cascadeKey);
-            },cascadeKey);
-        }
-        params.datas = datas;
-    }
-    function _autoExpand(datas,cascadeKey){
-        datas.forEach(function(data){
-            if(autoExpand(data)){
-                data._expand=true;
-            }
-        });
-        function autoExpand(data){
-            var children=data[cascadeKey];
-            if(!children){
-                return false;
-            }
-            if(children.some(function(item){
-                    return item._active;
-                })){
-                return true;
-            }else{
-                return children.some(function(data){
-                    if(autoExpand(data)){
-                        return data._expand=true;
-                    }
+            return cls
+          }
+        })
+          .html([
+            $('<div/>', {
+              'class': itemCls
+            }).append(
+              (function() {
+                if (showExpand) {
+                  if (!isLeaf) {
+                    return $('<span/>', {
+                      'class': expandCaretCls,
+                      'click': function() {
+                        currentData._expand = !currentData._expand
+                        _render.call($self, true)
+                      }
+                    }).append(
+                      expandFormatter.call($self, currentData, isLeaf, !!currentData._active, isExpand, level, idx, currentDatas, upperData, datas)
+                    )
+                  }
+                }
+              }()),
+              (function() {
+                var content = formatter.call($self, currentData, isLeaf, !!currentData._active, isExpand, level, idx, currentDatas, upperData, datas)
+                var events = Object.keys(rowEvents).reduce(function(result, key) {
+                  result[key] = rowEvents[key].bind($self, currentData, isLeaf, !!currentData._active, isExpand, level, idx, currentDatas, upperData, datas)
+                  return result
+                }, {})
+                $.each(content, function(idx, ele) {
+                  $(ele).on(events)
                 })
-            }
+                return content
+              }())
+            ),
+            (function() {
+              if (!isLeaf) {
+                return _recursiveGenerate.call($self, currentData[cascadeKey], level, currentData, doExpand)
+              }
+            }())
+          ])
+      })
+    )
+  }
+  function _isActiveAncestor(data) {
+    var $self = this
+    var params = $self.data('leftMenu')
+    var cascadeKey = params.cascadeKey
+    var isActiveAncestorStatus = false
+    var datas = data[cascadeKey]
+    if (!datas) {
+      return isActiveAncestorStatus
+    }
+    isActiveAncestor(datas)
+    return isActiveAncestorStatus
+    function isActiveAncestor(datas) {
+      datas.forEach(function(data) {
+        if (data._active) {
+          isActiveAncestorStatus = true
+        } else {
+          isActiveAncestor(data[cascadeKey] || [])
         }
+      })
     }
-    function select(currentData){
-        var params = this.data('leftMenu'),
-            datas=params.datas,
-            cascadeKey=params.cascadeKey,
-            id=params.id;
-        changeActive(datas);
-        _autoExpand(datas,cascadeKey);
-        function changeActive(datas){
-            datas.forEach(function(data){
-                data._active=currentData[id]==data[id]?true:false;
-                if(data[cascadeKey]){
-                    changeActive(data[cascadeKey])
-                }
-            });
+  }
+  function _recursiveProcessing(datas, handler, lowerLevelKey) {
+    lowerLevelKey = lowerLevelKey || 'children'
+    recursive(datas, null, -1)
+    function recursive(currentDatas, upperData, level) {
+      currentDatas.forEach(function(currentData, idx) {
+        if (!idx) { level++ }
+        handler(currentData, level, idx, currentDatas, upperData, datas)
+        var lowerDatas = currentData[lowerLevelKey]
+        if (lowerDatas && lowerDatas instanceof Array) {
+          recursive(lowerDatas, currentData, level)
         }
+      })
     }
-    function selectByIdx(){
-        var idxs = Array.prototype.slice.call(arguments);
-        var params = this.data('leftMenu'),
-            datas=params.datas,
-            cascadeKey=params.cascadeKey,
-            level=idxs.length-1,
-            currentLevel= -1,
-            currentData;
-        falseActive(datas,cascadeKey);
-        while(++currentLevel<=level){
-            if(!currentLevel){
-                currentData=datas[idxs[currentLevel]]
-            }else{
-                currentData=currentData[cascadeKey][idxs[currentLevel]]
-            }
-        }
-        currentData._active=true;
-        _autoExpand(datas,cascadeKey);
-    }
-    function falseActive(datas,cascadeKey){
-        datas.forEach(function(data,i){
-            data._active=false;
-            if(data[cascadeKey]){
-                falseActive(data[cascadeKey],cascadeKey)
-            }
-        });
-    }
-    function selectDeepFirst(){
-        var params = this.data('leftMenu'),
-        datas=params.datas,
-        cascadeKey=params.cascadeKey,
-        currentData=datas[0];
-        falseActive(datas,cascadeKey);
-        while(currentData&&currentData[cascadeKey]&&currentData[cascadeKey].length){
-            currentData=currentData[cascadeKey][0];
-        }
-        currentData._active=true;
-        _autoExpand(datas,cascadeKey);
-    }
-    function selectById(idx){
-        var params = this.data('leftMenu'),
-            datas=params.datas,
-            cascadeKey=params.cascadeKey,
-            id=params.id;
-        changeActive(datas);
-        _autoExpand(datas,cascadeKey);
-        function changeActive(datas){
-            datas.forEach(function(data){
-                data._active=idx==data[id]?true:false;
-                if(data[cascadeKey]){
-                    changeActive(data[cascadeKey])
-                }
-            });
-        }
-    }
-    function refresh(){}
-    function getSelected() {
-        var params = this.data("leftMenu"),
-            datas=params.datas,
-            cascadeKey=params.cascadeKey,
-            currentData=null;
-        _getSelected(datas);
-        return currentData;
-        function _getSelected(datas){
-            (datas||[]).forEach(function(data){
-                if(data._active){
-                    currentData=data;
-                }else{
-                    _getSelected(data[cascadeKey]);
-                }
-            })
-        }
-    }
-    function _render(doExpand) {
-        var $self = this,
-            params = $self.data("leftMenu"),
-            datas=params.datas,
-            showExpand=params.showExpand;
-        $self.addClass(function(){
-            return "leftMenu"+(showExpand?" showExpand":"");
-        }).html(
-            _recursiveGenerate.call($self,datas,-1,null,doExpand)
-        );
-    }
-    function _recursiveGenerate(currentDatas,level,upperData,doExpand){
-        var $self = this,
-            ele = this.get(0),
-            params = $self.data("leftMenu"),
-            datas = params.datas,
-            cascadeKey=params.cascadeKey,
-            ulCls=params.ulCls,
-            liCls=params.liCls,
-            itemCls=params.itemCls,
-            expandCaretCls=params.expandCaretCls,
-            expandCls=params.expandCls,
-            activeCls=params.activeCls,
-            formatter=params.formatter,
-            onSelected=params.onSelected,
-            rowEvents=params.rowEvents,
-            showExpand=params.showExpand,
-            expandFormatter=params.expandFormatter,
-            deferreds=params.deferreds||[],
-            deferred = deferreds.reduce(function(prev,item){
-                if(item.ele===ele){
-                    return item.deferred;
-                }
-                return prev;
-            },null);
-        return $("<ul/>",{
-            "class":ulCls
-        }).html(
-            currentDatas.map(function(currentData,idx){
-                if(!idx){
-                    level++;
-                }
-                var isLeaf=!(currentData[cascadeKey]||[]).length,
-                    isExpand=function(){
-                        if(!showExpand){
-                            return _isActiveAncestor.call($self,currentData);
-                        }else{
-                            return !!currentData._expand;
-                        }
-                    }();
-                if(currentData._active&&!doExpand){
-                    onSelected.call($self,currentData,isLeaf,!!currentData._active,isExpand,level,idx,currentDatas,upperData,datas,deferred);
-                }
-                return $("<li/>",{
-                    "class":function(){
-                        var cls = liCls;
-                        if(currentData._active){
-                            cls+=" "+activeCls;
-                        }
-                        if(!showExpand){
-                            if(_isActiveAncestor.call($self,currentData)){
-                                cls+=" "+expandCls;
-                            }
-                        }else{
-                            if(currentData._expand){
-                                cls+=" "+expandCls;
-                            }
-                        }
-                        return cls;
-                    }
-                })
-                    .html([
-                        $("<div/>",{
-                            "class":itemCls
-                        }).append(
-                            function(){
-                                if(showExpand){
-                                    if(!isLeaf){
-                                        return $("<span/>",{
-                                            "class":expandCaretCls,
-                                            "click":function(){
-                                                currentData._expand=!currentData._expand;
-                                                _render.call($self,true);
-                                            }
-                                        }).append(
-                                            expandFormatter.call($self,currentData,isLeaf,!!currentData._active,isExpand,level,idx,currentDatas,upperData,datas)
-                                        )
-                                    }
-                                }
-                            }(),
-                            function(){
-                                var content= formatter.call($self,currentData,isLeaf,!!currentData._active,isExpand,level,idx,currentDatas,upperData,datas);
-                                var events=Object.keys(rowEvents).reduce(function(result,key){
-                                    result[key]=rowEvents[key].bind($self,currentData,isLeaf,!!currentData._active,isExpand,level,idx,currentDatas,upperData,datas);
-                                    return result;
-                                },{});
-                                $.each(content,function(idx,ele){
-                                    $(ele).on(events);
-                                });
-                                return content;
-                            }()
-                        ),
-                        function(){
-                            if(!isLeaf){
-                                return _recursiveGenerate.call($self,currentData[cascadeKey],level,currentData,doExpand);
-                            }
-                        }()
-                    ])
-            })
-        )
-    }
-    function _isActiveAncestor(data){
-        var $self = this,
-            params = $self.data("leftMenu"),
-            cascadeKey=params.cascadeKey,
-            isActiveAncestorStatus=false;
-        var datas=data[cascadeKey];
-        if(!datas){
-            return isActiveAncestorStatus;
-        }
-        isActiveAncestor(datas);
-        return isActiveAncestorStatus;
-        function isActiveAncestor(datas){
-            datas.forEach(function(data){
-                if(data._active){
-                    isActiveAncestorStatus=true;
-                }else{
-                    isActiveAncestor(data[cascadeKey]||[]);
-                }
-            })
-        }
-    }
-    function _recursiveProcessing(datas,handler,lowerLevelKey){
-        lowerLevelKey=lowerLevelKey||"children";
-        recursive(datas,null,-1);
-        function recursive(currentDatas,upperData,level){
-            currentDatas.forEach(function(currentData,idx){
-                if(!idx){level++};
-                handler(currentData,level,idx,currentDatas,upperData,datas);
-                var lowerDatas=currentData[lowerLevelKey];
-                if(lowerDatas&&lowerDatas instanceof Array){
-                    recursive(lowerDatas,currentData,level);
-                }
-            });
-        }
-    };
-})(jQuery);
+  }
+})(jQuery)
